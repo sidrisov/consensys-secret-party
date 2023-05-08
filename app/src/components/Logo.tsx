@@ -1,8 +1,6 @@
-import { SvgIcon, Typography } from '@mui/material';
-import { red } from '@mui/material/colors';
+import { Typography } from '@mui/material';
 import { Box } from '@mui/system';
 import { Link } from 'react-router-dom';
-import { ReactComponent as Logo } from '../assets/cubes.svg';
 
 export default function HomeLogo(props: any) {
   return (

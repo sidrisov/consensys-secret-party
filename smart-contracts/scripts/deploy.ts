@@ -22,6 +22,7 @@ main()
     process.exit(1);
   });
 
+// seed with hardcoded data
 const INVITATIONS = [
   'Sidney Kertzmann',
   'Miss Margarita Lowe Sr.',

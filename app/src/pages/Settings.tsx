@@ -18,7 +18,7 @@ export default function Settings() {
   return (
     <>
       <Helmet>
-        <title> Template | Settings </title>
+        <title> Secret Party | Settings </title>
       </Helmet>
       <Box mt={3} display="flex" flexDirection="column">
         <Typography align="center" color="primary" variant="h6" m={1}>
