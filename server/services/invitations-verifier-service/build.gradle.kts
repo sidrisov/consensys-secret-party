@@ -19,6 +19,7 @@ dependencies {
 	developmentOnly("org.springframework.boot:spring-boot-devtools")
 
 	implementation("org.apache.commons:commons-lang3:3.12.0")
+	implementation("org.bouncycastle:bcprov-jdk18on:1.73")
 
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("io.projectreactor:reactor-test")
