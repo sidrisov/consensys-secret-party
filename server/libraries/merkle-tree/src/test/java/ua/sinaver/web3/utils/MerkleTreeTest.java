@@ -6,7 +6,6 @@ package ua.sinaver.web3.utils;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.bouncycastle.util.encoders.Hex;
@@ -16,9 +15,9 @@ public class MerkleTreeTest {
 
     @Test
     public void testRootCalculation() {
-        final List<String> leaves = new ArrayList<>(Arrays.asList("A", "B", "C", "D", "E", "F", "G", "H", "I"));
-        String rootHash = "Hash(Hash(Hash(Hash(Hash(A)Hash(B))Hash(Hash(C)Hash(D)))Hash(Hash(Hash(E)Hash(F))Hash(Hash(G)Hash(H))))Hash(I))";
-        MerkleTree merkleTree = new MerkleTree(leaves, (input) -> {
+        final List<String> leaves = Arrays.asList("A", "B", "C", "D", "E", "F", "G", "H", "I");
+        final String rootHash = "Hash(Hash(Hash(Hash(Hash(A)Hash(B))Hash(Hash(C)Hash(D)))Hash(Hash(Hash(E)Hash(F))Hash(Hash(G)Hash(H))))Hash(I))";
+        final MerkleTree merkleTree = new MerkleTree(leaves, (input) -> {
             /*
              * MessageDigest digest256 = new Keccak.Digest256();
              * return digest256.digest(input);
@@ -30,10 +29,54 @@ public class MerkleTreeTest {
                 merkleTree.getRoot()),
                 rootHash, new String(Hex.decode(merkleTree.getRoot())));
 
-        int leafIndex = 3;
-        List<ProofData> proof = merkleTree.getProof(leafIndex);
-        assertTrue(String.format("Checking if proof is correct"),
-                merkleTree.verifyProof(proof, leaves.get(leafIndex), Hex.toHexString(rootHash.getBytes())));
+    }
 
+    @Test
+    public void testGetProof() {
+        final List<String> leaves = Arrays.asList("A", "B", "C", "D", "E", "F", "G", "H", "I");
+        final int leafIndex = 3;
+        final List<ProofData> expectedProof = Arrays.asList(
+                new ProofData("Hash(C)", true),
+                new ProofData("Hash(Hash(A)Hash(B))", true),
+                new ProofData("Hash(Hash(Hash(E)Hash(F))Hash(Hash(G)Hash(H)))", false),
+                new ProofData("Hash(I)", false));
+
+        final MerkleTree merkleTree = new MerkleTree(leaves, (input) -> {
+            /*
+             * MessageDigest digest256 = new Keccak.Digest256();
+             * return digest256.digest(input);
+             */
+            return String.format("Hash(%s)", new String(input)).getBytes();
+        });
+        final List<ProofData> actualProof = merkleTree.getProof(leafIndex).stream()
+                .map(proof -> new ProofData(new String(Hex.decode(proof.data())), proof.left())).toList();
+
+        assertEquals(expectedProof, actualProof);
+    }
+
+    @Test
+    public void testVerifyProof() {
+        final List<String> leaves = Arrays.asList("A", "B", "C", "D", "E", "F", "G", "H", "I");
+        final String rootHash = "Hash(Hash(Hash(Hash(Hash(A)Hash(B))Hash(Hash(C)Hash(D)))Hash(Hash(Hash(E)Hash(F))Hash(Hash(G)Hash(H))))Hash(I))";
+        final int leafIndex = 3;
+        final List<ProofData> expectedProof = Arrays.asList(
+                new ProofData("Hash(C)", true),
+                new ProofData("Hash(Hash(A)Hash(B))", true),
+                new ProofData("Hash(Hash(Hash(E)Hash(F))Hash(Hash(G)Hash(H)))", false),
+                new ProofData("Hash(I)", false));
+
+        final MerkleTree merkleTree = new MerkleTree(Arrays.asList(), (input) -> {
+            /*
+             * MessageDigest digest256 = new Keccak.Digest256();
+             * return digest256.digest(input);
+             */
+            return String.format("Hash(%s)", new String(input)).getBytes();
+        });
+
+        assertTrue(String.format("Checking if proof is correct"),
+                merkleTree.verifyProof(expectedProof.stream()
+                        .map(proof -> new ProofData(Hex.toHexString(proof.data().getBytes()), proof.left()))
+                        .toList(), leaves.get(leafIndex),
+                        Hex.toHexString(rootHash.getBytes())));
     }
 }
